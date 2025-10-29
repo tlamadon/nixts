@@ -6,12 +6,75 @@ A TypeScript DSL to build Nix flakes declaratively with full IDE autocomplete su
 
 - **Type-safe package names**: Autocomplete for 24,000+ nixpkgs packages and 10,000+ Python packages
 - **Home Manager support**: Full type hints for 4,701 home-manager options with autocomplete for 351 programs and 160 services
+- **CLI tool**: Build Nix flakes from TypeScript files with a simple command
 - **Flexible composition**: Three different composition styles for maximum flexibility
 - **Builder pattern**: Fluent API for constructing Nix flakes
 - **Runtime validation**: Validates package names against actual nixpkgs data
 - **TypeScript-first**: Full type safety and IDE support
 
+## Installation
+
+### As a Library
+
+```bash
+npm install nixts
+```
+
+### As a CLI Tool
+
+```bash
+npm install -g nixts
+```
+
+Or use without installing:
+
+```bash
+npx nixts build my-flake.ts
+```
+
 ## Quick Start
+
+### Using the CLI
+
+The easiest way to get started is using the CLI to generate Nix flakes from TypeScript files:
+
+```bash
+# Create a starter template
+nixts init my-flake.ts
+
+# Build the Nix flake
+nixts build my-flake.ts
+
+# This creates my-flake.nix next to your TypeScript file
+nix develop -f ./my-flake.nix
+```
+
+**CLI Usage:**
+
+```bash
+nixts build <file.ts>              # Creates <file>.nix
+nixts build <file.ts> -o out.nix   # Custom output name
+nixts init [file.ts]               # Create starter template
+nixts --help                       # Show help
+nixts --version                    # Show version
+```
+
+Your TypeScript file should use the nixts API and output the result:
+
+```ts
+import { FlakeBuilder } from "nixts";
+
+const flake = new FlakeBuilder()
+  .withInput("nixpkgs", "github:NixOS/nixpkgs/nixos-24.05")
+  .addDevShell("default", (shell) => {
+    shell.withPackages(["git", "nodejs"]);
+  })
+  .build();
+
+console.log(flake);
+```
+
+### Using as a Library
 
 ### Development Environments
 
@@ -166,9 +229,28 @@ This will:
 
 ## Examples
 
+### Library Usage
+
 - [examples/composition-styles.ts](examples/composition-styles.ts) - Different composition patterns
 - [examples/homemanager-demo.ts](examples/homemanager-demo.ts) - Basic home-manager configurations
 - [examples/homemanager-typed-demo.ts](examples/homemanager-typed-demo.ts) - Type-safe home-manager with autocomplete
+
+### CLI Usage
+
+- [examples/cli-simple.ts](examples/cli-simple.ts) - Simple Node.js development shell
+- [examples/cli-python-ml.ts](examples/cli-python-ml.ts) - Python ML environment with packages
+- [examples/cli-homemanager.ts](examples/cli-homemanager.ts) - Home-manager configuration
+- [examples/cli-multi-shell.ts](examples/cli-multi-shell.ts) - Multiple development shells
+
+**Try the CLI examples:**
+
+```bash
+# Build any example
+nixts build examples/cli-simple.ts
+
+# Use the generated flake
+nix develop -f ./examples/cli-simple.nix
+```
 
 ## Documentation
 
