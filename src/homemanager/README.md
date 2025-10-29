@@ -56,14 +56,20 @@ The extracted 4701 options include:
 After extracting options, generate TypeScript types:
 
 ```bash
-npm run generate:types
+npm run generate:homemanager:types
 ```
 
-This creates `homemanager-options.d.ts` with the `HomeManagerOptionName` type that provides autocomplete for option names.
+This creates:
+- `homemanager-config.d.ts` - Full type definitions for all home-manager options
+- `ProgramName` type - Autocomplete for 351 programs
+- `ServiceName` type - Autocomplete for 160 services
+- `HomeManagerOptions` interface - Complete configuration structure
 
 ## Usage in Code
 
-The `HomeManagerBuilder` provides a fluent API for building home-manager configurations:
+The `HomeManagerBuilder` provides a fluent API with **full type hints** for all 4,701 home-manager options:
+
+### Basic Usage
 
 ```typescript
 import { HomeManagerBuilder } from "nixts";
@@ -72,14 +78,48 @@ const home = new HomeManagerBuilder("myuser")
   .withHomeDirectory("/home/myuser")
   .withStateVersion("24.05")
   .withPackages(["git", "vim", "tmux"])
+  // Type-safe program names with autocomplete for all 351 programs
   .enableProgram("git", {
     enable: true,
     userName: "My Name",
     userEmail: "me@example.com"
+  })
+  // Type-safe service names with autocomplete for all 160 services
+  .enableService("syncthing", { enable: true });
+```
+
+### Advanced Usage with Full Type Hints
+
+The `set()` method provides autocomplete for **all** home-manager options:
+
+```typescript
+const home = new HomeManagerBuilder("developer")
+  .withStateVersion("24.05")
+  // Full autocomplete for all top-level options
+  .set("programs", {
+    git: { enable: true, userName: "Dev" },
+    neovim: { enable: true, defaultEditor: true },
+    tmux: { enable: true, baseIndex: 1 }
+  })
+  .set("home", {
+    sessionVariables: { EDITOR: "nvim" },
+    shellAliases: { ll: "ls -la" }
+  })
+  .set("services", {
+    "gpg-agent": { enable: true }
   });
 ```
 
-See [examples/homemanager-demo.ts](../../examples/homemanager-demo.ts) for comprehensive examples.
+### Type Safety Benefits
+
+1. **Autocomplete** - IntelliSense shows all 351 programs and 160 services
+2. **Type checking** - Catch typos at compile time (e.g., "giit" will error)
+3. **Documentation** - Hover over options to see inline docs
+4. **Refactoring** - Rename with confidence across your codebase
+
+See these examples for more:
+- [examples/homemanager-demo.ts](../../examples/homemanager-demo.ts) - Basic examples
+- [examples/homemanager-typed-demo.ts](../../examples/homemanager-typed-demo.ts) - Type-safe examples
 
 ## Updating Options
 

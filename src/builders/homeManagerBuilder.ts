@@ -1,4 +1,9 @@
 import type { NixpkgsPackageName } from "../nixpkgs/types/nixpkgs-packages.js";
+import type {
+  HomeManagerOptions,
+  ProgramName,
+  ServiceName
+} from "../homemanager/types/homemanager-config.js";
 
 /**
  * Home Manager configuration options
@@ -12,6 +17,13 @@ export interface HomeManagerConfig {
   services?: Record<string, any>;
   home?: Record<string, any>;
 }
+
+/**
+ * Deep partial type to allow partial configuration at any level
+ */
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
 
 /**
  * Builder for Home Manager configurations
@@ -75,7 +87,7 @@ export class HomeManagerBuilder {
    * @param name - Program name (e.g., "git", "vim", "bash")
    * @param config - Program-specific configuration
    */
-  enableProgram(name: string, config: any = { enable: true }): this {
+  enableProgram(name: ProgramName, config: any = { enable: true }): this {
     this.programs[name] = config;
     return this;
   }
@@ -85,7 +97,7 @@ export class HomeManagerBuilder {
    * @param name - Service name
    * @param config - Service-specific configuration
    */
-  enableService(name: string, config: any = { enable: true }): this {
+  enableService(name: ServiceName, config: any = { enable: true }): this {
     this.services[name] = config;
     return this;
   }
@@ -98,6 +110,78 @@ export class HomeManagerBuilder {
   setHomeConfig(path: string, value: any): this {
     this.homeConfig[path] = value;
     return this;
+  }
+
+  /**
+   * Set any home-manager option with full type hints
+   * @param path - Option path (e.g., "programs.git.enable", "home.sessionVariables")
+   * @param value - Option value
+   *
+   * @example
+   * ```ts
+   * builder.set("programs.git.enable", true)
+   *   .set("programs.git.userName", "John Doe")
+   *   .set("home.sessionVariables", { EDITOR: "vim" })
+   * ```
+   */
+  set<K extends keyof HomeManagerOptions>(
+    path: K,
+    value: DeepPartial<HomeManagerOptions[K]>
+  ): this {
+    const parts = (path as string).split('.');
+
+    if (parts[0] === 'programs' && parts.length >= 2) {
+      const programName = parts[1];
+      if (parts.length === 2) {
+        this.programs[programName] = value;
+      } else {
+        if (!this.programs[programName]) {
+          this.programs[programName] = {};
+        }
+        const subPath = parts.slice(2).join('.');
+        this.setNestedValue(this.programs[programName], subPath, value);
+      }
+    } else if (parts[0] === 'services' && parts.length >= 2) {
+      const serviceName = parts[1];
+      if (parts.length === 2) {
+        this.services[serviceName] = value;
+      } else {
+        if (!this.services[serviceName]) {
+          this.services[serviceName] = {};
+        }
+        const subPath = parts.slice(2).join('.');
+        this.setNestedValue(this.services[serviceName], subPath, value);
+      }
+    } else if (parts[0] === 'home' && parts.length >= 2) {
+      const subPath = parts.slice(1).join('.');
+      this.setNestedValue(this.homeConfig, subPath, value);
+    } else {
+      // For top-level options like stateVersion, username, etc.
+      const rootPath = parts[0];
+      if (rootPath === 'home') {
+        Object.assign(this.homeConfig, value);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Helper method to set nested values in an object
+   */
+  private setNestedValue(obj: any, path: string, value: any): void {
+    const parts = path.split('.');
+    let current = obj;
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      if (!current[part]) {
+        current[part] = {};
+      }
+      current = current[part];
+    }
+
+    current[parts[parts.length - 1]] = value;
   }
 
   /**
