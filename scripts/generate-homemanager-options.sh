@@ -9,7 +9,28 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Generating home-manager options..."
 
-# Try method 1: Use the dedicated nix script
+# Primary method: Scrape from official documentation (most reliable and complete)
+echo "Scraping options from home-manager documentation website..."
+if curl -sL "https://nix-community.github.io/home-manager/options.xhtml" 2>/dev/null | \
+  grep -o 'id="opt-[^"]*"' | \
+  sed 's/id="opt-//; s/"$//' | \
+  sed 's/_name_/<name>/g' | \
+  sort -u | \
+  jq -R -s 'split("\n") | map(select(length > 0))' > "$OUTPUT_FILE" 2>/dev/null; then
+
+  if [ -s "$OUTPUT_FILE" ]; then
+    OPTION_COUNT=$(jq 'length' "$OUTPUT_FILE")
+    if [ "$OPTION_COUNT" -gt 100 ]; then
+      echo "✓ Successfully scraped $OPTION_COUNT home-manager options from documentation!"
+      echo "✓ Home-manager options generated -> $OUTPUT_FILE"
+      exit 0
+    fi
+  fi
+fi
+
+echo "Scraping failed, trying local nix evaluation..."
+
+# Fallback method 1: Use the dedicated nix script
 if nix-instantiate --eval --strict --json "$SCRIPT_DIR/generate-homemanager-options.nix" 2>/dev/null | jq 'sort' > "$OUTPUT_FILE" 2>/dev/null; then
   if [ -s "$OUTPUT_FILE" ]; then
     OPTION_COUNT=$(jq 'length' "$OUTPUT_FILE")
@@ -19,48 +40,11 @@ if nix-instantiate --eval --strict --json "$SCRIPT_DIR/generate-homemanager-opti
   fi
 fi
 
-# Try method 2: Use nix flake if available
-echo "Trying alternative method using nix flake..."
-if command -v nix &> /dev/null; then
-  if nix eval --json --impure --expr '
-    let
-      flake = builtins.getFlake "github:nix-community/home-manager/release-24.05";
-      pkgs = import <nixpkgs> {};
-      lib = pkgs.lib;
-
-      eval = lib.evalModules {
-        modules = flake.nixosModules.home-manager.imports;
-        specialArgs = { inherit pkgs; };
-      };
-
-      collectOptions = prefix: opts:
-        lib.concatLists (lib.mapAttrsToList (name: value:
-          let path = if prefix == "" then name else "${prefix}.${name}";
-          in
-          if value ? _type && value._type == "option"
-          then [ path ]
-          else if lib.isAttrs value && !value ? _type
-          then collectOptions path value
-          else []
-        ) opts);
-    in
-      lib.sort (a: b: a < b) (collectOptions "" eval.options)
-  ' 2>/dev/null > "$OUTPUT_FILE"; then
-    if [ -s "$OUTPUT_FILE" ]; then
-      OPTION_COUNT=$(jq 'length' "$OUTPUT_FILE")
-      echo "✓ Successfully extracted $OPTION_COUNT home-manager options using flakes"
-      echo "✓ Home-manager options generated -> $OUTPUT_FILE"
-      exit 0
-    fi
-  fi
-fi
-
-# Fallback: Provide a comprehensive basic set
+# Fallback method 2: Provide a comprehensive manual set
 echo "Warning: Could not extract options from home-manager automatically."
 echo "         Using comprehensive manual option list."
-echo "         To get the full list, ensure home-manager is in your NIX_PATH:"
-echo "         nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager"
-echo "         nix-channel --update"
+echo "         For the full list of 4700+ options, ensure you have internet connectivity"
+echo "         so the script can scrape from https://nix-community.github.io/home-manager/"
 
 cat > "$OUTPUT_FILE" << 'EOF'
 [

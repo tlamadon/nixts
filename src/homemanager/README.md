@@ -15,34 +15,41 @@ homemanager/
 
 ## Generating Home Manager Options
 
-The home-manager options can be extracted automatically or use a curated fallback list.
+The home-manager options are automatically extracted from the official documentation, providing **4700+ complete option coverage**.
 
-### Automatic Extraction
+### Automatic Extraction (Recommended)
 
-The script tries two methods to extract options:
+Simply run:
+```bash
+npm run generate:homemanager
+```
 
-1. **Using NIX_PATH** (requires home-manager in channels):
-   ```bash
-   nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-   nix-channel --update
-   npm run generate:homemanager
-   ```
+This command:
+1. **Primary method**: Scrapes all 4701 options from the official home-manager documentation
+   - Source: `https://nix-community.github.io/home-manager/`
+   - **No local home-manager installation required**
+   - Only needs internet connectivity
+   - Most reliable and complete method
+   - Covers ALL home-manager modules and options
 
-2. **Using Nix Flakes** (requires experimental features):
-   ```bash
-   npm run generate:homemanager
-   ```
-   This will fetch home-manager from GitHub directly.
+2. **Fallback method**: Uses local Nix evaluation if scraping fails
+   - Requires home-manager in NIX_PATH or as a channel
+   - Falls back to curated list of 70 common options if all else fails
 
-### Manual Fallback
+### Complete Option Coverage
 
-If automatic extraction fails, the script uses a curated list of 70+ common home-manager options including:
-- Core options (`home.username`, `home.homeDirectory`, etc.)
-- Program configurations (`programs.git.*`, `programs.bash.*`, etc.)
-- Service configurations (`services.gpg-agent.*`)
-- XDG settings
-
-This fallback list covers the most commonly used options and is sufficient for most use cases.
+The extracted 4701 options include:
+- **Core options**: `home.*` (username, homeDirectory, stateVersion, packages, etc.)
+- **Programs**: `programs.*` for 200+ programs
+  - Development: git, neovim, vim, vscode, emacs
+  - Shells: bash, zsh, fish, nushell
+  - Terminal: tmux, alacritty, kitty, wezterm
+  - And many more...
+- **Services**: `services.*` (gpg-agent, syncthing, dunst, etc.)
+- **Accounts**: `accounts.*` (email, calendar, contacts)
+- **XDG settings**: `xdg.*` (configHome, dataHome, stateHome, etc.)
+- **File management**: `home.file.*` for declarative file management
+- **Session variables**: `home.sessionVariables.*`
 
 ## Type Generation
 
@@ -74,14 +81,28 @@ const home = new HomeManagerBuilder("myuser")
 
 See [examples/homemanager-demo.ts](../../examples/homemanager-demo.ts) for comprehensive examples.
 
-## Extending the Option List
+## Updating Options
 
-To add more options to the fallback list, edit:
-- `scripts/generate-homemanager-options.sh` (the fallback section)
+To get the latest options:
 
-To use the full auto-extracted list:
-1. Set up home-manager in your Nix environment
-2. Run `npm run generate:homemanager`
-3. Run `npm run generate:types`
+1. Update the extraction (pulls from latest documentation):
+   ```bash
+   npm run generate:homemanager
+   ```
 
-The extracted list will contain hundreds of options covering all home-manager modules.
+2. Regenerate TypeScript types:
+   ```bash
+   npm run generate:types
+   ```
+
+3. Rebuild the project:
+   ```bash
+   npm run build
+   ```
+
+Or run all at once:
+```bash
+npm run generate && npm run build
+```
+
+The scraper will automatically fetch the latest options from the official home-manager documentation.
