@@ -15,10 +15,42 @@ export class FlakeBuilder {
     return this;
   }
 
-  addDevShell(name: string, fn: (b: DevShellBuilder) => void): this {
+  /**
+   * Add a dev shell using callback-style DSL (returns FlakeBuilder for chaining)
+   * @param name - Name of the dev shell
+   * @param fn - Callback function to configure the shell
+   * @returns this for method chaining
+   */
+  addDevShell(name: string, fn: (b: DevShellBuilder) => void): this;
+
+  /**
+   * Add a dev shell and return the builder instance for further configuration
+   * @param name - Name of the dev shell
+   * @returns The DevShellBuilder instance for further chaining
+   */
+  addDevShell(name: string): DevShellBuilder;
+
+  // Implementation
+  addDevShell(name: string, fn?: (b: DevShellBuilder) => void): this | DevShellBuilder {
     const b = new DevShellBuilder(name);
-    fn(b);
     this.devShells.push(b);
+
+    if (fn) {
+      fn(b);
+      return this; // Return FlakeBuilder for continued chaining
+    }
+
+    return b; // Return DevShellBuilder for external configuration
+  }
+
+  /**
+   * Add a dev shell using an existing builder instance
+   * Useful for external composition and reusable shell configurations
+   * @param builder - Pre-configured DevShellBuilder instance
+   * @returns this for method chaining
+   */
+  addDevShellBuilder(builder: DevShellBuilder): this {
+    this.devShells.push(builder);
     return this;
   }
 
