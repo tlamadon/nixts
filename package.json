@@ -3,11 +3,30 @@
   "version": "0.1.0",
   "description": "A TypeScript DSL for building Nix flakes with builder pattern and nixpkgs introspection.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
     "nixts": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tlamadon/nixts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tlamadon/nixts/issues"
+  },
+  "homepage": "https://github.com/tlamadon/nixts#readme",
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc -p .",
     "generate:python": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {}).python3Packages' | jq '.' > src/nixpkgs/data/python-packages.json",
     "generate:nixpkgs": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {})' | jq '.' > src/nixpkgs/data/nixpkgs-packages.json",

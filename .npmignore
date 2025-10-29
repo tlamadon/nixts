@@ -1,0 +1,42 @@
+# Source files (we include src in package.json files array, but exclude these)
+*.ts
+!*.d.ts
+
+# Development files
+.git
+.gitignore
+.vscode
+.idea
+*.log
+npm-debug.log*
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# Build artifacts
+tsconfig.json
+tsconfig.*.json
+
+# Scripts (not needed in published package)
+scripts/
+
+# Examples (users can view these on GitHub)
+examples/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation source
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
