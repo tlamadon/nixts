@@ -1,0 +1,25 @@
+{
+  "name": "nixts",
+  "version": "0.1.0",
+  "description": "A TypeScript DSL for building Nix flakes with builder pattern and nixpkgs introspection.",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "generate:python": "nix eval --json nixpkgs#python3Packages | jq 'keys' > src/nixpkgs/data/python-packages.json"
+  },
+  "keywords": [
+    "nix",
+    "nixpkgs",
+    "nixos",
+    "home-manager",
+    "builder",
+    "typescript",
+    "dsl"
+  ],
+  "author": "Thibaut Lamadon",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
