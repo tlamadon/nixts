@@ -1,1 +1,7 @@
 **/.DS_Store
+node_modules
+dist
+
+# Generated files
+src/nixpkgs/data/*.json
+src/nixpkgs/types/*.d.ts

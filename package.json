@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p .",
-    "generate:python": "nix eval --json nixpkgs#python3Packages | jq 'keys' > src/nixpkgs/data/python-packages.json"
+    "generate:python": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {}).python3Packages' | jq '.' > src/nixpkgs/data/python-packages.json",
+    "generate:nixpkgs": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {})' | jq '.' > src/nixpkgs/data/nixpkgs-packages.json",
+    "generate:types": "tsx scripts/generate-types.ts",
+    "generate": "npm run generate:python && npm run generate:nixpkgs && npm run generate:types"
   },
   "keywords": [
     "nix",
@@ -20,6 +23,7 @@
   "author": "Thibaut Lamadon",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "tsx": "^4.7.0"
   }
 }

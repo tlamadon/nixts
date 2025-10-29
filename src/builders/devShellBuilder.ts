@@ -1,4 +1,6 @@
 import { validatePythonPackages } from "../nixpkgs/python.js";
+import type { PythonPackageName } from "../nixpkgs/types/python-packages.js";
+import type { NixpkgsPackageName } from "../nixpkgs/types/nixpkgs-packages.js";
 
 export class DevShellBuilder {
   private name: string;
@@ -10,12 +12,12 @@ export class DevShellBuilder {
     this.name = name;
   }
 
-  withPackages(pkgs: string[]): this {
+  withPackages(pkgs: NixpkgsPackageName[]): this {
     this.packages.push(...pkgs);
     return this;
   }
 
-  withPythonPackages(pkgs: string[]): this {
+  withPythonPackages(pkgs: PythonPackageName[]): this {
     const invalid = validatePythonPackages(pkgs);
     if (invalid.length) {
       throw new Error(`Invalid Python packages: ${invalid.join(", ")}`);
