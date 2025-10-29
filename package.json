@@ -8,8 +8,9 @@
     "build": "tsc -p .",
     "generate:python": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {}).python3Packages' | jq '.' > src/nixpkgs/data/python-packages.json",
     "generate:nixpkgs": "nix-instantiate --eval --strict --json -E 'builtins.attrNames (import <nixpkgs> {})' | jq '.' > src/nixpkgs/data/nixpkgs-packages.json",
+    "generate:homemanager": "bash scripts/generate-homemanager-options.sh",
     "generate:types": "tsx scripts/generate-types.ts",
-    "generate": "npm run generate:python && npm run generate:nixpkgs && npm run generate:types"
+    "generate": "npm run generate:python && npm run generate:nixpkgs && npm run generate:homemanager && npm run generate:types"
   },
   "keywords": [
     "nix",

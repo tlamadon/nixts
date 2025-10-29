@@ -88,4 +88,24 @@ generatePackageTypes(
   "NixpkgsPackageName"
 );
 
+// Generate home-manager option types
+const homemanagerOptionsInput = resolve(
+  __dirname,
+  "../src/homemanager/data/homemanager-options.json"
+);
+const homemanagerOptionsOutput = resolve(
+  __dirname,
+  "../src/homemanager/types/homemanager-options.d.ts"
+);
+
+try {
+  generatePackageTypes(
+    homemanagerOptionsInput,
+    homemanagerOptionsOutput,
+    "HomeManagerOptionName"
+  );
+} catch (error) {
+  console.log("⚠ Skipping home-manager types (run generate:homemanager first)");
+}
+
 console.log("\n✓ Type generation complete!");

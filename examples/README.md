@@ -30,6 +30,17 @@ Comprehensive guide to different composition patterns:
 4. **Hybrid Approach** - Combining multiple patterns
 5. **Factory Pattern** - DRY configurations with templates
 
+### [homemanager-demo.ts](homemanager-demo.ts)
+
+Demonstrates home-manager configuration builder:
+- Creating home-manager configurations with the `HomeManagerBuilder`
+- Configuring programs (git, bash, neovim, tmux, etc.)
+- Setting up packages and environment variables
+- Integrating home-manager into flakes
+- Combining dev shells and home-manager configurations
+- Using custom home-manager modules
+- Reusable home configuration patterns
+
 ## Creating Your Own Examples
 
 Feel free to create your own example files in this directory to experiment with nixts features. All TypeScript files here can be run directly with `tsx`.
